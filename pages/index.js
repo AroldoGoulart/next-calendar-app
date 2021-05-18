@@ -10,14 +10,95 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { FiCalendar, FiBell, FiUsers } from "react-icons/fi";
-import { BottomNavigation, Button, BottomNavigationAction, Fab, Toolbar, Slide, AppBar, Typography } from "@material-ui/core/"
+import { BottomNavigation, Button, BottomNavigationAction, IconButton, Fab, Toolbar, Slide, AppBar, Typography, InputBase } from "@material-ui/core/"
 import { useRouter } from 'next/router'
 import { format, compareAsc } from 'date-fns'
 import messageAnimation from "./../lotties/message-in-a-bottle.json"
 import Lottie from "react-lottie"
-import { ArrowUpward, AccountCircle, ExitToApp } from '@material-ui/icons';
+import { ArrowUpward, AccountCircle, ExitToApp, Search } from '@material-ui/icons';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+import { fade, makeStyles } from '@material-ui/core/styles';
+import MenuIcon from '@material-ui/icons/Menu';
 
+export const appointments = [
+    {
+      title: 'P 2x',
+      startDate: new Date(2021, 5, 25, 9, 35),
+      endDate: new Date(2021, 5, 25, 10, 30),
+      id: 0,
+      location: 'Room 1',
+      type: "P"
+    }, 
+    {
+        title: 'R 2x',
+        startDate: new Date(2021, 5, 25, 9, 35),
+        endDate: new Date(2021, 5, 25, 10, 30),
+        id: 0,
+        location: 'Room 1',
+        type: 'R'
+      }, 
+  ];
+
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+      flexGrow: 1,
+    },
+    selected: {
+        "&$selected": {
+            color: "#BD1821"
+          }
+    },
+    menuButton: {
+      marginRight: theme.spacing(2),
+    },
+    title: {
+      flexGrow: 1,
+      display: 'none',
+      [theme.breakpoints.up('sm')]: {
+        display: 'block',
+      },
+    },
+    search: {
+      position: 'relative',
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: fade(theme.palette.common.white, 0.15),
+      '&:hover': {
+        backgroundColor: fade(theme.palette.common.white, 0.25),
+      },
+      marginLeft: 0,
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        marginLeft: theme.spacing(1),
+        width: 'auto',
+      },
+    },
+    searchIcon: {
+      padding: theme.spacing(0, 2),
+      height: '100%',
+      position: 'absolute',
+      pointerEvents: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    inputRoot: {
+      color: 'inherit',
+    },
+    inputInput: {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        width: '12ch',
+        '&:focus': {
+          width: '20ch',
+        },
+      },
+    },
+  }));
 
 const defaultOptions = {
     loop: true,
@@ -36,9 +117,38 @@ function CustomLoadingOverlay() {
     );
 }
 
+
+const handlerClickTp = (event) => {
+    const { data } = event
+    console.log(data) 
+}
+
+const Appointment = ({
+    children, style, ...restProps
+  }) => (
+    <Appointments.Appointment
+      {...restProps}
+      style={{
+        ...style,
+        backgroundColor: children[1].props.data.type == "P" ? "#4f5bff"  : '#1aed9c',
+        borderRadius: '8px',
+        textAlign: "right",
+        fontSize: 13
+      }}
+      onClick={(eve) => handlerClickTp(eve)}
+    >   
+    {console.log()}
+          {children}
+    </Appointments.Appointment>
+  );
+  
+
 export default function Home(props) {
     const [calendars, setCalendars] = useState([{}, {}, {}, {}, {}, {} ])
     const [value, setValue] = useState(0)
+    const [mounted, setMounted] = useState(false)
+    const classes = useStyles();
+
     const [currentMonth, setCurrentMonth] = useState((new Date()));
     const router = useRouter()
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
@@ -52,14 +162,11 @@ export default function Home(props) {
 
     useEffect(() => {
         window.addEventListener('scroll', handleScroll, { passive: true });
-    
+        setMounted(true)
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
-
-
-    
 
     const navigate = (href) => {
        // router.push(href)
@@ -98,15 +205,13 @@ export default function Home(props) {
                startIcon={<ExitToApp/>}
                style={{
                    flex: 1,
-                   width: "100%",
+                   width: "100%",       
                    marginBottom: 30,
                    height: 50
                }} variant="contained"
                >
                 Disconnettersi
                 </Button>
-                
-
             </div>
         )
     }
@@ -142,6 +247,11 @@ export default function Home(props) {
                         <b>Yay! You have seen it all</b>
                     </p>
                 }
+                style={{
+                    paddingRight: 20,
+                    paddingLeft: 20,
+                    paddingTop: 20
+                }}
                 // below props only if you need pull down functionality
                 refreshFunction={refresh}
                 pullDownToRefresh
@@ -152,25 +262,38 @@ export default function Home(props) {
                         const now = new Date()
                         let todayData = new Date(now.getFullYear(), now.getMonth() + index, 1);
                         const today_format = format(todayData, 'yyyy/MM/dd')
-
                         const name = todayData.getMonth()
+
                         return (
                             <Paper>
-                                <Scheduler>
+                                <Scheduler 
+                                    onClick={( a) => alert(a)}
+                                    locale={"it"}
+                                    data={appointments}
+                                >
                                     <ViewState
                                         currentDate={today_format}
+                                        locale
                                     />
                                         <MonthView 
                                             today
                                             endOfGroup={false}
+                                            dayScaleEmptyCellComponent={() => {
+                                                return <h1> ok </h1>
+                                            }}
                                             otherMonth={false}
-                                            title={"er"}
+
                                         />
+                                    <Appointments
+                                        appointmentComponent={Appointment}
+                                    />
+
                                         <Typography variant="h5" style={{
                                             position: "relative",
                                             margin: 10
-                                        }}>{monthNames[name]}</Typography>
-                                    <Appointments />
+                                        }}>
+                                        {monthNames[name]}
+                                        </Typography>
                                 </Scheduler>
                             </Paper>
                         )
@@ -187,6 +310,9 @@ export default function Home(props) {
         // This is only being set here because the demo is in an iframe.
         const trigger = useScrollTrigger({ target: window ? window() : undefined });
       
+        if(value != 0) {
+            return null
+        }
         return (
           <Slide appear={true} direction="down" in={!trigger} style={{ }}>
             {children}
@@ -204,18 +330,37 @@ export default function Home(props) {
         return renderProfile()
     }
 
+    if(!mounted) {
+        return null
+    }
     return (
-        <div>   
+        <div>
             <HideOnScroll {...props}>
-                <AppBar>
+            <AppBar style={{
+                backgroundColor: "#BD1828"
+            }}  position="static">
                 <Toolbar>
-                    <Typography variant="h6">Benvenuto!</Typography>
+                    <Typography className={classes.title} variant="h6" noWrap>
+                    NonSolograndine
+                    </Typography>
+                    <div className={classes.search}>
+                        <div className={classes.searchIcon}>
+                        <Search />
+                        </div>
+                        <InputBase
+                        placeholder="Search…"
+                        classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                        }}
+                        inputProps={{ 'aria-label': 'search' }}
+                        />
+                    </div>
                 </Toolbar>
-                </AppBar>
+            </AppBar>
             </HideOnScroll>
             
             <div style={{
-                marginTop: 60,
                 marginBottom: 60
             }}>
                 {
@@ -238,8 +383,8 @@ export default function Home(props) {
                     }}>
                         <Fab onClick={() => {
                               window.scrollTo(0, 0)
-                        }} color="primary" aria-label="add">
-                            <ArrowUpward />
+                        }}  style={{ backgroundColor: "#DB1828"}} aria-label="add">
+                            <ArrowUpward  style={{ color: "white" }} />
                         </Fab>
                     </aside>
                     )
@@ -261,17 +406,20 @@ export default function Home(props) {
                     <BottomNavigationAction 
                         onClick={() => navigate('home')}
                         label="Calendario" 
-                        icon={<FiCalendar/>}
+                        icon={<FiCalendar  />}
+                        classes={classes}
                     />
                     <BottomNavigationAction 
                         onClick={() => navigate('notifications')} 
                         label="Notifiche" 
                         icon={<FiBell />} 
+                        classes={classes}
                     />
                     <BottomNavigationAction 
                         onClick={() => navigate('profile')} 
                         label="Profilo" 
                         icon={<FiUsers />} 
+                        classes={classes}
                     />
                 </BottomNavigation>
             </footer>
