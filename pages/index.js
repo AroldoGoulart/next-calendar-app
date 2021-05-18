@@ -13,7 +13,7 @@ import { FiCalendar, FiBell, FiUsers } from "react-icons/fi";
 import { BottomNavigation, Button, BottomNavigationAction, Fab, Toolbar, Slide, AppBar, Typography } from "@material-ui/core/"
 import { useRouter } from 'next/router'
 import { format, compareAsc } from 'date-fns'
-import messageAnimation from "../../src/lottie/message-in-a-bottle.json"
+import messageAnimation from "./../lotties/message-in-a-bottle.json"
 import Lottie from "react-lottie"
 import { ArrowUpward, AccountCircle, ExitToApp } from '@material-ui/icons';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
