@@ -131,7 +131,7 @@ const Appointment = ({
       style={{
         ...style,
         backgroundColor: children[1].props.data.type == "P" ? "#4f5bff"  : '#1aed9c',
-        borderRadius: '8px',
+        borderRadius: '2px',
         textAlign: "right",
         fontSize: 13
       }}
@@ -248,32 +248,29 @@ export default function Home(props) {
                     </p>
                 }
                 style={{
-                    paddingRight: 20,
-                    paddingLeft: 20,
                     paddingTop: 20
                 }}
                 // below props only if you need pull down functionality
                 refreshFunction={refresh}
                 pullDownToRefresh
                 pullDownToRefreshThreshold={50}
-                >
+            >
                 {
                     calendars.map((value, index) => {
                         const now = new Date()
-                        let todayData = new Date(now.getFullYear(), now.getMonth() + index, 1);
+                        let todayData = new Date(now.getFullYear(), now.getMonth()-1 + index, 1);
                         const today_format = format(todayData, 'yyyy/MM/dd')
                         const name = todayData.getMonth()
-
                         return (
                             <Paper>
                                 <Scheduler 
                                     onClick={( a) => alert(a)}
-                                    locale={"it"}
+                                    locale={"it-IT"}
                                     data={appointments}
                                 >
                                     <ViewState
                                         currentDate={today_format}
-                                        locale
+                                        locale={"it-IT  "}
                                     />
                                         <MonthView 
                                             today
@@ -348,7 +345,7 @@ export default function Home(props) {
                         <Search />
                         </div>
                         <InputBase
-                        placeholder="Search…"
+                        placeholder="Cerca"
                         classes={{
                             root: classes.inputRoot,
                             input: classes.inputInput,
