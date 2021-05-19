@@ -118,31 +118,6 @@ function CustomLoadingOverlay() {
 }
 
 
-const handlerClickTp = (event) => {
-    const { data } = event
-    console.log(data) 
-}
-
-const Appointment = ({
-    children, style, ...restProps
-  }) => (
-    <Appointments.Appointment
-      {...restProps}
-      style={{
-        ...style,
-        backgroundColor: children[1].props.data.type == "P" ? "#4f5bff"  : '#1aed9c',
-        borderRadius: '2px',
-        textAlign: "right",
-        fontSize: 13
-      }}
-      onClick={(eve) => handlerClickTp(eve)}
-    >   
-    {console.log()}
-          {children}
-    </Appointments.Appointment>
-  );
-  
-
 export default function Home(props) {
     const [calendars, setCalendars] = useState([{}, {}, {}, {}, {}, {} ])
     const [value, setValue] = useState(0)
@@ -180,6 +155,37 @@ export default function Home(props) {
         return true
     }
 
+
+    const handlerClickTp = (event) => {
+        const { data: { title, type, startDate } } = event
+        console.log(event) 
+        const dateUrl =  format(startDate, 'yyyy/MM/dd')
+        console.log(dateUrl)
+        router.push("list", `?date=${dateUrl}`)
+    }
+
+    const Appointment = ({
+        children, style, ...restProps
+    }) => (
+        <Appointments.Appointment
+        {...restProps}
+        style={{
+            ...style,
+            backgroundColor: children[1].props.data.type == "P" ? "#4f5bff"  : '#1aed9c',
+            borderRadius: '2px',
+            textAlign: "right",
+            fontSize: 13
+        }}
+        onClick={(eve) => handlerClickTp(eve)}
+        >   
+        <>
+        {children}
+        </>
+        </Appointments.Appointment>
+    );
+    
+
+    
     const renderProfile = () => {
         return (
             <div style={{
