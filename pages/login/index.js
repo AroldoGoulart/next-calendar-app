@@ -14,6 +14,9 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { Input, InputAdornment, IconButton, FormControl, InputLabel } from '@material-ui/core';
 
+import { LoginInApp } from "../../services/consumer"
+import { useLocalStorage } from "../../hooks"
+
 const useStyles = makeStyles((theme) => ({
     container: {
       padding: theme.spacing(3),
@@ -34,8 +37,10 @@ function Login() {
     const [password, setPassword] = useState('')
     const [showPass, setShowPass] = useState(false)
     const [login, setLogin] = useState('')
+    const [error, setError] = useState('')
     const classes = useStyles();
     const router = useRouter()
+    const [idCached, setIdCached] = useLocalStorage("id", null)
 
     const handleChange = (prop) => (event) => {
         setPassword(event.target.value);
@@ -45,8 +50,17 @@ function Login() {
         setShowPass(!showPass);
     };
     
-    const onSubmit = () => {
-        router.push("/")
+    const onSubmit = async () => {
+        const response = await LoginInApp(login, password)
+        setError("")
+        if(response.ID) {
+            // FIXME verify user inactive and set error
+            setIdCached(response.ID)
+            router.push("/")    
+        }
+        else {
+            setError("Controlla i tuoi dati di accesso")
+        }
     }
     return (
         <div style={{ 
@@ -77,6 +91,8 @@ function Login() {
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
+                                value={login}
+                                onChange={(event) => setLogin(event.target.value)}
                                 //inputRef={register}
                                 label="Utente"
                                 name="email"
@@ -106,6 +122,11 @@ function Login() {
                         </FormControl>
                         </Grid>
                         </Grid>
+                        <h1 style={{
+                            fontSize: 13
+                        }}>
+                        {error || "" }
+                        </h1>
                     </Grid>
                     <Grid  style={{ 
                         marginTop: 30
@@ -118,6 +139,7 @@ function Login() {
                         fullWidth onClick={() => onSubmit()} variant="contained">
                         Accedi
                         </Button>
+                         
                     </Grid>
                     </Grid>
                 </form>

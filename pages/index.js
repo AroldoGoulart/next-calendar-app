@@ -14,11 +14,14 @@ import { BottomNavigation, Button, BottomNavigationAction, IconButton, Fab, Tool
 import { useRouter } from 'next/router'
 import { format, compareAsc } from 'date-fns'
 import messageAnimation from "./../lotties/message-in-a-bottle.json"
+import carLoadingAnimation from "./../lotties/car_loading.json"
+
 import Lottie from "react-lottie"
 import { ArrowUpward, AccountCircle, ExitToApp, Search } from '@material-ui/icons';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
+import { useLocalStorage } from "../hooks"
 
 export const appointments = [
     {
@@ -114,15 +117,15 @@ function CustomLoadingOverlay() {
         <div style={{ position: 'absolute', top: 0, width: '100%' }}>
           <LinearProgress />
         </div>
-    );
+    );      
 }
-
 
 export default function Home(props) {
     const [calendars, setCalendars] = useState([{}, {}, {}, {}, {}, {} ])
     const [value, setValue] = useState(0)
     const [mounted, setMounted] = useState(false)
     const classes = useStyles();
+    const [idCached, setIdCached] = useLocalStorage('id', -1)
 
     const [currentMonth, setCurrentMonth] = useState((new Date()));
     const router = useRouter()
@@ -130,12 +133,18 @@ export default function Home(props) {
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
     ];   
     const [scrollPosition, setScrollPosition] = useState(0);
+
     const handleScroll = () => {
         const position = window.pageYOffset;
         setScrollPosition(position);
     };
 
     useEffect(() => {
+        // Verify if user is logged
+        if(idCached == -1) {
+            router.push("login")
+        }
+
         window.addEventListener('scroll', handleScroll, { passive: true });
         setMounted(true)
         return () => {
@@ -333,9 +342,33 @@ export default function Home(props) {
         return renderProfile()
     }
 
+    useEffect(() => {
+        if(mounted) {
+            alert(`Id do usuario: ${idCached}`)
+        }
+    }, [mounted])
     if(!mounted) {
-        return null
+        let customOptions = defaultOptions
+        customOptions.animationData = carLoadingAnimation
+        return (
+            <div style={{
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 100
+            }}>
+                <Lottie options={customOptions}
+                    height={250}
+                    width={250}
+                />
+                <h2 style={{
+                    textAlign: "center"
+                }}>
+                Loading
+                </h2>
+            </div>
+        )
     }
+
     return (
         <div>
             <HideOnScroll {...props}>
