@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Paper from '@material-ui/core/Paper';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import {
@@ -7,42 +7,20 @@ import {
   Appointments,
 } from '@devexpress/dx-react-scheduler-material-ui';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import LinearProgress from '@material-ui/core/LinearProgress';
-
 import { FiCalendar, FiBell, FiUsers } from "react-icons/fi";
 import { BottomNavigation, Button, BottomNavigationAction, IconButton, Fab, Toolbar, Slide, AppBar, Typography, InputBase } from "@material-ui/core/"
 import { useRouter } from 'next/router'
 import { format, compareAsc } from 'date-fns'
 import messageAnimation from "./../lotties/message-in-a-bottle.json"
 import carLoadingAnimation from "./../lotties/car_loading.json"
-
 import Lottie from "react-lottie"
 import { ArrowUpward, AccountCircle, ExitToApp, Search } from '@material-ui/icons';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 import { fade, makeStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
 import { useLocalStorage } from "../hooks"
+import { CalendarEvents } from '../services/consumer'
 
-export const appointments = [
-    {
-      title: 'P 2x',
-      startDate: new Date(2021, 5, 25, 9, 35),
-      endDate: new Date(2021, 5, 25, 10, 30),
-      id: 0,
-      location: 'Room 1',
-      type: "P"
-    }, 
-    {
-        title: 'R 2x',
-        startDate: new Date(2021, 5, 25, 9, 35),
-        endDate: new Date(2021, 5, 25, 10, 30),
-        id: 0,
-        location: 'Room 1',
-        type: 'R'
-      }, 
-  ];
-
-
+// Default styles
 const useStyles = makeStyles((theme) => ({
     root: {
       flexGrow: 1,
@@ -103,6 +81,7 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
+// Default config for animations
 const defaultOptions = {
     loop: true,
     autoplay: true, 
@@ -112,89 +91,135 @@ const defaultOptions = {
     }
   };
 
-function CustomLoadingOverlay() {
-    return (
-        <div style={{ position: 'absolute', top: 0, width: '100%' }}>
-          <LinearProgress />
-        </div>
-    );      
-}
-
 export default function Home(props) {
-    const [calendars, setCalendars] = useState([{}, {}, {}, {}, {}, {} ])
+    const [calendars, setCalendars] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ])
     const [value, setValue] = useState(0)
     const [mounted, setMounted] = useState(false)
+    const [Final, setFinalScroll] = useState(false)
+    const [renderedCounter, setRenderedCounter] = useState(0)
+    const [appointments, setAppointments] = useState([])
+    const [year, setYear] = useState(new Date().getFullYear())
     const classes = useStyles();
     const [idCached, setIdCached] = useLocalStorage('id', -1)
-
+    const ServicesRef = useRef(null);
     const [currentMonth, setCurrentMonth] = useState((new Date()));
     const router = useRouter()
+    const [scrollPosition, setScrollPosition] = useState(0);
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
     ];   
-    const [scrollPosition, setScrollPosition] = useState(0);
 
+    // handleScroll state to scroll screen
     const handleScroll = () => {
         const position = window.pageYOffset;
         setScrollPosition(position);
     };
 
+    // Executed when the app run first time
     useEffect(() => {
         // Verify if user is logged
         if(idCached == -1) {
+            // if not logged, go to login screen
             router.push("login")
         }
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        setMounted(true)
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
+        else { 
+            setMounted(true)
+            getAppointments()
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            return () => {
+                window.removeEventListener('scroll', handleScroll);
+            };
+        }
     }, []);
+
+    const getAppointments = async () => {
+        // Fetch from API
+        const events = await CalendarEvents(2021, idCached)
+
+        console.log(events)
+
+        if(events.message == "nothing found") {
+
+        }
+        else {
+            // Convert data of database in json
+            let convertedArray = []
+            for(let i=0; i < Object.keys(events).length; i++) {
+                const { 
+                    dataestesa,
+                    giorno,
+                    numAttiveP,
+                    numAttiveR,
+                    nump,
+                    numr
+                } = events[i]
+                
+                convertedArray[i] = {
+                    title: numr ? `R ${numr}x` : `P ${nump}x`,
+                    id: i,
+                    dataFromDb: {
+                        nump,
+                        numr,
+                        numAttiveP,
+                        numAttiveR,
+                        giorno,
+                        dataestesa,
+                    },
+                    location:  "not matter",
+                    type: numr ? `R` : `P`,
+                    startDate: new Date(2021, Number.parseInt(dataestesa.slice(0,2)), Number.parseInt(dataestesa.slice(4,6)), 9, 20),
+                    endDate: new Date(2021, Number.parseInt(dataestesa.slice(0,2)), Number.parseInt(dataestesa.slice(4,6)), 10, 30),
+                }
+            }
+            setRenderedCounter(renderedCounter+1)
+            setAppointments(convertedArray)          
+        }
+        
+    }
 
     const navigate = (href) => {
        // router.push(href)
     }
 
-    const fetchData = () => {
-        return null
-    }
-    
-    const refresh = () => {
-        return true
-    }
-
-
+    // Get the action of click in an appointment
     const handlerClickTp = (event) => {
         const { data: { title, type, startDate } } = event
-        console.log(event) 
+        console.log("ego", event.data.dataFromDb.dataestesa)
         const dateUrl =  format(startDate, 'yyyy/MM/dd')
-        console.log(dateUrl)
-        router.push("list", `?date=${dateUrl}`)
+        router.push("list", `?date=${event.data.dataFromDb.dataestesa}`)
     }
 
+    // Render all appointment
     const Appointment = ({
         children, style, ...restProps
-    }) => (
-        <Appointments.Appointment
-        {...restProps}
-        style={{
-            ...style,
-            backgroundColor: children[1].props.data.type == "P" ? "#4f5bff"  : '#1aed9c',
-            borderRadius: '2px',
-            textAlign: "right",
-            fontSize: 13
-        }}
-        onClick={(eve) => handlerClickTp(eve)}
-        >   
-        <>
-        {children}
-        </>
+    }) => {
+        
+        return (
+            <Appointments.Appointment
+                {...restProps}
+                style={{
+                    ...style,
+                    backgroundColor: children[1].props.data.type == 'R' 
+                    ? children[1].props.data.dataFromDb.numAttiveR ? `#95f943` :  `#fc675f`
+                    : children[1].props.data.dataFromDb.numAttiveP ? `#437af9` :  `#cc342c`,
+                    borderRadius: '2px',
+                    textAlign: "center",
+                    fontSize: 13,
+                    height: 35,
+                    paddingTop: 4,
+                    paddingBottom: 4
+                }}
+                onClick={(eve) => handlerClickTp(eve)}
+            >   
+            <>  
+                {children}
+            </>
         </Appointments.Appointment>
-    );
+        )
+    }
+        
     
-
-    
+    // render profile view
     const renderProfile = () => {
         return (
             <div style={{
@@ -231,6 +256,7 @@ export default function Home(props) {
         )
     }
 
+    // render notification view
     const renderNotification = () => {
         return (
             <div style={{ margin: 10 }}>
@@ -250,71 +276,69 @@ export default function Home(props) {
         )
     }
 
+    // render home view
     const renderHome = () => {
         return (
             <InfiniteScroll
-                dataLength={calendars.length} //This is important field to render the next data
-                next={fetchData}
+                dataLength={calendars.length}
+                //next={this.fetchMoreData}
+                style={{  }} //To put endMessage and loader to the top.
+                inverse={true} //
                 hasMore={true}
-                loader={CustomLoadingOverlay()}
-                endMessage={
-                    <p style={{ textAlign: 'center' }}>
-                        <b>Yay! You have seen it all</b>
-                    </p>
-                }
-                style={{
-                    paddingTop: 20
-                }}
-                // below props only if you need pull down functionality
-                refreshFunction={refresh}
-                pullDownToRefresh
-                pullDownToRefreshThreshold={50}
+                loader={<h4>Loading...</h4>}
+                scrollableTarget="scrollableDiv"
+                initialScrollY={750}
             >
-                {
-                    calendars.map((value, index) => {
-                        const now = new Date()
-                        let todayData = new Date(now.getFullYear(), now.getMonth()-1 + index, 1);
-                        const today_format = format(todayData, 'yyyy/MM/dd')
-                        const name = todayData.getMonth()
-                        return (
-                            <Paper>
-                                <Scheduler 
-                                    onClick={( a) => alert(a)}
+            {
+                calendars.map((value, index) => {
+                    const now = new Date()
+                    let todayData = new Date(now.getFullYear(), now.getMonth()-1 + index, 1);
+                    const today_format = format(todayData, 'yyyy/MM/dd')
+                    const name = todayData.getMonth()
+                    if(index == calendars.length) {
+                        setFinalScroll(true)
+                    }
+                    return (
+                        <Paper>
+                            <Scheduler
+                                // onClick={(a) => alert(a)}
+                                locale={"it-IT"}
+                                key={renderedCounter}
+                                data={appointments}
+                            >
+                                <ViewState
+                                    currentDate={today_format}
                                     locale={"it-IT"}
-                                    data={appointments}
-                                >
-                                    <ViewState
-                                        currentDate={today_format}
-                                        locale={"it-IT  "}
+                                />
+                                    <MonthView 
+                                        today
+                                        displayName={`moe`}
+                                        endOfGroup={false}
+                                        otherMonth={true}
                                     />
-                                        <MonthView 
-                                            today
-                                            endOfGroup={false}
-                                            dayScaleEmptyCellComponent={() => {
-                                                return <h1> ok </h1>
-                                            }}
-                                            otherMonth={false}
-
-                                        />
                                     <Appointments
                                         appointmentComponent={Appointment}
+                                        key={appointments.length}
                                     />
-
-                                        <Typography variant="h5" style={{
-                                            position: "relative",
-                                            margin: 10
-                                        }}>
-                                        {monthNames[name]}
-                                        </Typography>
-                                </Scheduler>
-                            </Paper>
-                        )
-                    })
-                }
-            </InfiniteScroll>
+                                    <Typography variant="h5" style={{
+                                        position: "relative",
+                                        margin: 10
+                                    }}>
+                                    {monthNames[name]}
+                                    </Typography>
+                            </Scheduler>
+                        </Paper>
+                    )
+                })
+            }
+                
+        </InfiniteScroll>
+        
+           
         )
     }
 
+    // hide top of page when scroll
     function HideOnScroll(props) {
         const { children, window } = props;
         // Note that you normally won't need to set the window ref as useScrollTrigger
@@ -330,8 +354,9 @@ export default function Home(props) {
             {children}
           </Slide>
         );
-      }
+    }
 
+    // manage the state of tabbarbuttons
     const renderContent = () => {
         if(value == 0) {
             return renderHome()
@@ -342,11 +367,7 @@ export default function Home(props) {
         return renderProfile()
     }
 
-    useEffect(() => {
-        if(mounted) {
-            alert(`Id do usuario: ${idCached}`)
-        }
-    }, [mounted])
+    // if the component is not rendered yet
     if(!mounted) {
         let customOptions = defaultOptions
         customOptions.animationData = carLoadingAnimation
@@ -373,7 +394,7 @@ export default function Home(props) {
         <div>
             <HideOnScroll {...props}>
             <AppBar style={{
-                backgroundColor: "#BD1828"
+                backgroundColor: "#a0a0a0"
             }}  position="static">
                 <Toolbar>
                     <Typography className={classes.title} variant="h6" noWrap>
@@ -396,7 +417,9 @@ export default function Home(props) {
             </AppBar>
             </HideOnScroll>
             
-            <div style={{
+            <div 
+            id="scrollableDiv"
+            style={{
                 marginBottom: 60
             }}>
                 {
@@ -418,8 +441,8 @@ export default function Home(props) {
                         zIndex: 10
                     }}>
                         <Fab onClick={() => {
-                              window.scrollTo(0, 0)
-                        }}  style={{ backgroundColor: "#DB1828"}} aria-label="add">
+                              window.scrollTo(0, 750)
+                        }}  style={{ backgroundColor: "#a0a0a0"}} aria-label="add">
                             <ArrowUpward  style={{ color: "white" }} />
                         </Fab>
                     </aside>
@@ -431,7 +454,9 @@ export default function Home(props) {
                     style={{
                         position: "fixed",
                         bottom: 0,
-                        width: "100%"
+                        width: "100%",
+                        elevation: 4,
+                        zIndex: 4
                     }}
                     value={value}
                     onChange={(event, newValue) => {

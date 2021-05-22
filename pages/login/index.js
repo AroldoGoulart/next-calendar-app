@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 10
     },
     root: {
-        backgroundColor: "#BD1828"
+        backgroundColor: "#a0a0a0"
     },
     label: {
         color: "#fff"
@@ -54,12 +54,16 @@ function Login() {
         const response = await LoginInApp(login, password)
         setError("")
         if(response.ID) {
-            // FIXME verify user inactive and set error
-            setIdCached(response.ID)
-            router.push("/")    
+            if(response.IsInactive == 1) {
+                setError("Utento NON attivo")
+            }
+            else {
+                setIdCached(response.ID)
+                router.push("/")    
+            }
         }
         else {
-            setError("Controlla i tuoi dati di accesso")
+            setError("Acesso negato, errore nelle credenziali")
         }
     }
     return (

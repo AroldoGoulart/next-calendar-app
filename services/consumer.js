@@ -1,9 +1,7 @@
 import api from './index'
 
-import axios from "axios"
+// Request for Login in database
 export async function LoginInApp(username, password) {
-
-    console.log(username, password)
     const response = await api({
         method: "POST",
         url: "login",
@@ -12,6 +10,46 @@ export async function LoginInApp(username, password) {
             password
         }
     })
-    console.log(response)
+    return response.data
+}
+
+// Request calendar
+export async function CalendarEvents(year, id) {
+    const response = await api({
+        method: "POST",
+        url: "calendar",
+        data: {
+            year,
+            id
+        }
+    })
+    return response.data
+}
+
+// Request events in calendar
+export async function Events(id, data) {
+    const response = await api({
+        method: "POST",
+        url: "event",
+        data: {
+            id,
+            data,
+            type: "date"
+        }
+    })
+    return response.data
+}
+
+// Request to search in all db
+export async function SearchData(id, data) {
+    const response = await api({
+        method: "POST",
+        url: "event",
+        data: {
+            id,
+            data,
+            type: "search"
+        }
+    })
     return response.data
 }

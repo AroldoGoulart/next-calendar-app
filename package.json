@@ -27,6 +27,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-interval-calendar": "^1.0.2",
     "react-lottie": "^1.2.3",
+    "react-swipeable-views": "^0.13.9",
     "swr": "^0.5.6"
   }
 }
