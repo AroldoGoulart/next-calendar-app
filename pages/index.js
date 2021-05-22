@@ -98,13 +98,14 @@ export default function Home(props) {
     const [Final, setFinalScroll] = useState(false)
     const [renderedCounter, setRenderedCounter] = useState(0)
     const [appointments, setAppointments] = useState([])
+    const [cercaText, setCercaText] = useState('')
     const [year, setYear] = useState(new Date().getFullYear())
     const classes = useStyles();
     const [idCached, setIdCached] = useLocalStorage('id', -1)
     const ServicesRef = useRef(null);
     const [currentMonth, setCurrentMonth] = useState((new Date()));
     const router = useRouter()
-    const [scrollPosition, setScrollPosition] = useState(0);
+    const [scrollPosition, setScrollPosition] = useState(750);
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
     ];   
@@ -136,8 +137,6 @@ export default function Home(props) {
         // Fetch from API
         const events = await CalendarEvents(2021, idCached)
 
-        console.log(events)
-
         if(events.message == "nothing found") {
 
         }
@@ -165,6 +164,8 @@ export default function Home(props) {
                         giorno,
                         dataestesa,
                     },
+                    numAttiveR,
+                    numAttiveP,
                     location:  "not matter",
                     type: numr ? `R` : `P`,
                     startDate: new Date(2021, Number.parseInt(dataestesa.slice(0,2)), Number.parseInt(dataestesa.slice(4,6)), 9, 20),
@@ -189,6 +190,11 @@ export default function Home(props) {
         router.push("list", `?date=${event.data.dataFromDb.dataestesa}`)
     }
 
+    const handlerDisconnect = () => {
+        setIdCached(-1)
+        router.push("login")
+    }
+
     // Render all appointment
     const Appointment = ({
         children, style, ...restProps
@@ -200,8 +206,8 @@ export default function Home(props) {
                 style={{
                     ...style,
                     backgroundColor: children[1].props.data.type == 'R' 
-                    ? children[1].props.data.dataFromDb.numAttiveR ? `#95f943` :  `#fc675f`
-                    : children[1].props.data.dataFromDb.numAttiveP ? `#437af9` :  `#cc342c`,
+                    ? children[1].props.data.numAttiveR ? `#95f943` :  `#fc675f`
+                    : children[1].props.data.numAttiveP ? `#437af9` :  `#cc342c`,
                     borderRadius: '2px',
                     textAlign: "center",
                     fontSize: 13,
@@ -225,23 +231,10 @@ export default function Home(props) {
             <div style={{
                 padding: 50
             }}>
-               <Button 
-               size={'large'}
-               color="primary"
-               startIcon={<AccountCircle/>}
-               style={{
-                   flex: 1,
-                   width: "100%",
-                   marginBottom: 30,
-                   height: 50
-               }} variant="contained"
-               >
-                Informazione
-                </Button>
-
-                <Button 
+            <Button 
                size={'large'}
                color="secondary"
+               onClick={() => handlerDisconnect()}
                startIcon={<ExitToApp/>}
                style={{
                    flex: 1,
@@ -331,11 +324,14 @@ export default function Home(props) {
                     )
                 })
             }
-                
         </InfiniteScroll>
-        
-           
         )
+    }
+
+    const handlerKeyPress = (event) => {
+        if(event.key === 'Enter') {
+            router.push("search", `?date=${cercaText}?search`)
+        }
     }
 
     // hide top of page when scroll
@@ -392,7 +388,6 @@ export default function Home(props) {
 
     return (
         <div>
-            <HideOnScroll {...props}>
             <AppBar style={{
                 backgroundColor: "#a0a0a0"
             }}  position="static">
@@ -411,12 +406,13 @@ export default function Home(props) {
                             input: classes.inputInput,
                         }}
                         inputProps={{ 'aria-label': 'search' }}
+                        value={cercaText}
+                        onKeyPress={handlerKeyPress}
+                        onChange={(event) => setCercaText(event.target.value)}
                         />
                     </div>
                 </Toolbar>
             </AppBar>
-            </HideOnScroll>
-            
             <div 
             id="scrollableDiv"
             style={{

@@ -27,14 +27,15 @@ export async function CalendarEvents(year, id) {
 }
 
 // Request events in calendar
-export async function Events(id, data) {
+export async function Events(id, data, table = "repair", type = "date") {
     const response = await api({
         method: "POST",
         url: "event",
         data: {
             id,
             data,
-            type: "date"
+            type,
+            table
         }
     })
     return response.data

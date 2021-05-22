@@ -9,8 +9,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SwipeableViews from 'react-swipeable-views';
 import { Events } from "../../services/consumer"
 import { useLocalStorage } from "../../hooks"
-import CallIcon from '@material-ui/icons/Call';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
+
 import { EventItem } from "../../components/EventItem"
 
 const useStyles = makeStyles((theme) => ({
@@ -123,7 +122,7 @@ const useStylesTab = makeStyles((theme) => ({
   },
 }));
 
-function List(props) {
+function SearchScreen(props) {
     const router = useRouter()
     const classes = useStyles();
     const classesContainer = useStylesContainer();
@@ -146,13 +145,25 @@ function List(props) {
     // convert url in string value and return
     const getDateInUrl = () => {
       let asPath = router.asPath.toLocaleLowerCase().slice(7, 6+11)
-      return asPath
+        if(router.asPath.toLocaleLowerCase().includes('search')) {
+            let indexOf = 0
+            for(let i=0; i < router.asPath.toLocaleLowerCase().length; i++) {
+                if(router.asPath.toLocaleLowerCase() == "?") {
+                    indexOf = i
+                }
+            }
+            return router.asPath.toLocaleLowerCase().slice(7, indexOf)
+        }
+        else {
+            return asPath
+        }
+     
     }
     
     // get repairs from api
     const getApiRepair = async () => {
       const dateInUrl = getDateInUrl()
-      const response = await Events(idCached, dateInUrl)
+      const response = await Events(idCached, dateInUrl, 'repair', "cerca")
       if(response.message == "nothing found") {
         setRepair([])
         return 
@@ -163,7 +174,7 @@ function List(props) {
     // get perizie from api
     const getApiPerizie = async () => {
       const dateInUrl = getDateInUrl()
-      const response = await Events(idCached, dateInUrl, "perizie")
+      const response = await Events(idCached, dateInUrl, "perizie", "cerca")
       if(response.message == "nothing found") {
         setPerizie([])
         return 
@@ -179,13 +190,7 @@ function List(props) {
     // Will call the company
     const openCall = () => {
     } 
-
-    // Will open the map
-    const openMap = (objectToMap) => {
-      setMapInfo(objectToMap)
-      router.push("map", `map`)
-    } 
-
+    
     const renderChildren = (children) => {
       return <EventItem children={children}/>
     }
@@ -277,5 +282,5 @@ function List(props) {
 }
 
 
-export default List
+export default SearchScreen
 
