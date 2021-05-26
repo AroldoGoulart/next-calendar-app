@@ -133,6 +133,12 @@ export default function Home(props) {
         }
     }, []);
 
+    useEffect(() => {
+        window.scroll({
+            top: 750
+        }) 
+    }, [mounted])
+
     const getAppointments = async () => {
         // Fetch from API
         const events = await CalendarEvents(2021, idCached)
@@ -154,7 +160,7 @@ export default function Home(props) {
                 } = events[i]
                 
                 convertedArray[i] = {
-                    title: numr ? `R ${numr}x` : `P ${nump}x`,
+                    title: numr ? `R ${numr}` : `P ${nump}`,
                     id: i,
                     dataFromDb: {
                         nump,
@@ -168,11 +174,12 @@ export default function Home(props) {
                     numAttiveP,
                     location:  "not matter",
                     type: numr ? `R` : `P`,
-                    startDate: new Date(2021, Number.parseInt(dataestesa.slice(0,2)), Number.parseInt(dataestesa.slice(4,6)), 9, 20),
-                    endDate: new Date(2021, Number.parseInt(dataestesa.slice(0,2)), Number.parseInt(dataestesa.slice(4,6)), 10, 30),
+                    startDate: new Date(2021, Number.parseInt(dataestesa.slice(4,6))-1, Number.parseInt(dataestesa.slice(0,2)), 9, 20),
+                    endDate: new Date(2021, Number.parseInt(dataestesa.slice(4,6))-1, Number.parseInt(dataestesa.slice(0,2)), 10, 30),
                 }
             }
-            setRenderedCounter(renderedCounter+1)
+            console.log(convertedArray)
+            setRenderedCounter(renderedCounter)
             setAppointments(convertedArray)          
         }
         
@@ -206,8 +213,8 @@ export default function Home(props) {
                 style={{
                     ...style,
                     backgroundColor: children[1].props.data.type == 'R' 
-                    ? children[1].props.data.numAttiveR ? `#95f943` :  `#fc675f`
-                    : children[1].props.data.numAttiveP ? `#437af9` :  `#cc342c`,
+                    ? children[1].props.data.numAttiveR ? `#95f943` :  `#d3d3d3`
+                    : children[1].props.data.numAttiveP ? `#437af9` :  `#d3d3d3`,
                     borderRadius: '2px',
                     textAlign: "center",
                     fontSize: 13,
@@ -281,6 +288,9 @@ export default function Home(props) {
                 loader={<h4>Loading...</h4>}
                 scrollableTarget="scrollableDiv"
                 initialScrollY={750}
+                ref={ServicesRef}
+                currentY={750}
+                startY={750}
             >
             {
                 calendars.map((value, index) => {

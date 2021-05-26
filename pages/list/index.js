@@ -7,7 +7,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SwipeableViews from 'react-swipeable-views';
-import { Events } from "../../services/consumer"
+import { Events, EventsAll } from "../../services/consumer"
 import { useLocalStorage } from "../../hooks"
 import CallIcon from '@material-ui/icons/Call';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
@@ -123,6 +123,7 @@ const useStylesTab = makeStyles((theme) => ({
   },
 }));
 
+
 function List(props) {
     const router = useRouter()
     const classes = useStyles();
@@ -168,9 +169,10 @@ function List(props) {
         setPerizie([])
         return 
       }
+      console.log("query", response)
       setPerizie(Object.entries(response))
     }
-    
+
     useEffect(() => {
       getApiRepair()
       getApiPerizie()
@@ -187,6 +189,7 @@ function List(props) {
     } 
 
     const renderChildren = (children) => {
+      console.log(children)
       return <EventItem children={children}/>
     }
     
@@ -202,11 +205,8 @@ function List(props) {
                     <ArrowBackIcon />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
-                    NonSolograndine
-                    </Typography>
-                    <Button color="inherit">
                     {getDateInUrl()}
-                    </Button>
+                    </Typography>
                 </Toolbar>
             </AppBar>
             </div>

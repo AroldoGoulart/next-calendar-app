@@ -41,6 +41,41 @@ export async function Events(id, data, table = "repair", type = "date") {
     return response.data
 }
 
+// Request CreateDocument
+export async function CreateDocument(ID_incarico, ID_profilo, tipo) {
+    const response = await api({
+        method: "POST",
+        url: "createDocument",
+        data: {
+            ID_incarico, ID_profilo, tipo
+        }
+    })
+    return response.data
+}
+
+// Request CreateDocument
+export async function listDocument(ID_incarico) {
+    const response = await api({
+        method: "POST",
+        url: "listDocument",
+        data: {
+            ID_incarico
+        }
+    })
+    return response.data
+}
+
+export async function EventsAll(data) {
+    const response = await api({
+        method: "POST",
+        url: "allEvent",
+        data: {
+            data,
+        }
+    })
+    return response.data
+}
+
 // Request to search in all db
 export async function SearchData(id, data) {
     const response = await api({

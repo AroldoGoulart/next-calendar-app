@@ -1,8 +1,37 @@
-
+import React, { useState, } from 'react'
 import CallIcon from '@material-ui/icons/Call';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
+import { useLocalStorage } from "../../hooks"
+import { useRouter } from 'next/router'
+import { AppBar, Toolbar, IconButton } from "@material-ui/core"
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { FiberPin } from '@material-ui/icons';
+
 
 export function EventItem(props) {
+  const [mapInfo, setMapInfo] = useLocalStorage("mapInfo", {})
+  const router = useRouter()
+  
+  // Will call the company
+    const openCall = () => {
+    } 
+
+    // Will open the map
+    const openMap = (objectToMap) => {
+      setMapInfo(objectToMap)
+      router.push("map", `map`)
+    } 
+
+    const openDocument = (objectToMap) => {
+      setMapInfo(objectToMap)
+      console.log(objectToMap)
+      router.push(`documents`)
+    }
+
+
     const { children } = props
     if(!children) {
         return (
@@ -53,6 +82,16 @@ export function EventItem(props) {
           }}>
           {children.company_name}
           </h3>
+
+          <h3 style={{
+            fontSize: 14,
+            color: "grey",
+            fontWeight: '500',
+            marginTop: -10
+          }}>
+          {children.tipo == "R" ? "Riparazione" : "Perizia"}
+          </h3>
+
           
           {
             children.latitude > 0 && (
@@ -77,6 +116,36 @@ export function EventItem(props) {
             ): null
           }
         
+        {
+          children.numdocumenti ? ( 
+            <AssignmentIcon
+              style={{
+                  color: "#BD1821",
+                  marginLeft: !children.latitude > 0 ? 0 : 5
+                }}
+                onClick={() => openDocument(children)}
+            ></AssignmentIcon>
+
+          ): null
+        }
+        {
+          children.condizione == "A" ?  (
+            <EditIcon
+            onClick={() => openEdit(children)}
+            style={{
+                color: "#BD1821",
+                marginLeft: !children.latitude > 0 ? 0 : 5
+            }}
+            />
+          ): (
+            <VisibilityIcon
+              style={{
+                  color: "#BD1821",
+                  marginLeft: !children.latitude > 0 ? 0 : 5
+              }}
+            /> 
+          )
+        }
         </div>
       )
 }
