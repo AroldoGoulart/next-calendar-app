@@ -31,6 +31,10 @@ export function EventItem(props) {
       router.push(`documents`)
     }
 
+    const openEdit = () => {
+      
+    }
+
 
     const { children } = props
     if(!children) {
