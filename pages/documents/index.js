@@ -15,7 +15,6 @@ import { AppBar, Toolbar, IconButton, Button,  } from "@material-ui/core"
 import FolderIcon from '@material-ui/icons/Folder';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import Input from '@material-ui/core/Input';
-import { CameraFeed } from '../../components/Camera';
 import { useLocalStorage } from "../../hooks"
 import { CreateDocument, listDocument } from '../../services/consumer';
 import SendIcon from '@material-ui/icons/Send';
