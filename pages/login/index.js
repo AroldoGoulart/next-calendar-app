@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 10
     },
     root: {
-        backgroundColor: "#a0a0a0"
+        backgroundColor: "#BD1828"
     },
     label: {
         color: "#fff"

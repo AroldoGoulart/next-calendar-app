@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js"
+    "start": "next start -p $PORT"
   },
   "dependencies": {
     "@devexpress/dx-react-core": "^2.7.5",
